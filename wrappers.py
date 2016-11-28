@@ -23,7 +23,7 @@ def lariatsoft_one(gen_fcl_file_path, conv_fcl_file_path, out_path, n_events, in
     3. execute mk_pilot
     :param gen_fcl_file_path: a path on the host that ends with .fcl (used for generation phase)
     :param conv_fcl_file_path: a path on the host that ends with .fcl (used for conversion phase)
-    :param out_path: a path within the context of config_data.get('data_volume')
+    :param out_path: a path with config_data.get('data_volume') as the root ex "$DATA_VOLUME/docker_user/electron/"
     :param n_events: integer number of events that should be generated
     :param index: single_gen_X where X is the index
     :return:
@@ -39,15 +39,31 @@ def lariatsoft_one(gen_fcl_file_path, conv_fcl_file_path, out_path, n_events, in
         config_data = json.load(config_file_handle)
 
     data_volume = config_data.get('data_volume')
+
+    tmp_fcl_file_path = os.path.join(data_volume, "docker_user/fcl_files")
     try:
-        tmp_fcl_file_path = os.path.join(data_volume, "docker_user/fcl_files")
         shutil.copy(gen_fcl_file_path, tmp_fcl_file_path)
-        shutil.copy(conv_fcl_file_path, tmp_fcl_file_path)
-        # copy python?
-        mkdir_p(os.path.join(data_volume, out_path))
+    except shutil.Error as e:
+        print(e)
+        pass
     except Exception as e:
         print(e)
         return False
+
+    try:
+        shutil.copy(conv_fcl_file_path, tmp_fcl_file_path)
+    except shutil.Error as e:
+        print(e)
+        pass
+    except Exception as e:
+        print(e)
+        return False
+
+    # copy python? not for now (should use git instead)
+    try:
+        mkdir_p(os.path.join(data_volume, out_path))
+    except Exception as e:
+        print(e)
 
     phase_one_output_path = os.path.join(data_volume, out_path, "single_gen_{0}.root".format(index))
     gen_fcl_file_base = os.path.basename(gen_fcl_file_path)
