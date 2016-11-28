@@ -50,9 +50,9 @@ def mk_pilot(data_volume, command, docker_image_name, queue=None, username=None)
 
     task_object.save()
 
-    docker_init_cmd = "docker run -itv {0}:/data --net=\"host\"{1} python3 /opt/caroline/core.py {2}".format(data_volume,
-                                                                                                docker_image_name,
-                                                                                                task_object.c_id)
+    docker_init_cmd = "docker run -v {0}:/data --net=\"host\" {1} python3 /opt/caroline/core.py {2}".format(data_volume,
+                                                                                                            docker_image_name,
+                                                                                                            task_object.c_id)
 
     temp_file_path = os.path.join("/tmp", "{0}.run".format(task_object.c_id))
 
