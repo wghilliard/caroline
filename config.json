@@ -1,0 +1,7 @@
+{
+  "username": "wghilliard",
+  "default_image": "ubuntu:latest",
+  "log_dir": "wghilliard/logs",
+  "data_volume": "/data",
+  "queue": "cpuqueue"
+}
