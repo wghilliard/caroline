@@ -88,7 +88,7 @@ def lariatsoft_one(gen_fcl_file_path, conv_fcl_file_path, out_path, n_events, in
     # TODO this is atrocious, please fix this
     command_final = " && ".join(commands)
 
-    print(command_final)
+    # print(command_final)
     mk_pilot(data_volume, command_final, config_data.get('default_image'))
 
     return True
