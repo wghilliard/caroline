@@ -7,6 +7,8 @@ import shutil
 import json
 import os
 from utils import mkdir_p
+from mongoengine import connect
+from config import MONGODB_DATABASE, MONGODB_IP
 
 
 def lariatsoft_one(gen_fcl_file_path, conv_fcl_file_path, out_path, n_events, index):
@@ -95,4 +97,5 @@ def lariatsoft_one(gen_fcl_file_path, conv_fcl_file_path, out_path, n_events, in
 
 
 if __name__ == "__main__":
+    connect(MONGODB_DATABASE, host=MONGODB_IP)
     lariatsoft_one("/Users/wghilliard/one.fcl", "/Users/wghilliard/two.fcl", "docker_user/10000", 5, 1)

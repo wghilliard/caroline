@@ -10,7 +10,7 @@ import os
 import argparse
 from models import Task
 from mongoengine import connect
-from config import MONGODB_DATABASE
+from config import MONGODB_DATABASE, MONGODB_IP
 import json
 import time
 import subprocess as sp
@@ -75,7 +75,7 @@ def mk_pilot(data_volume, command, docker_image_name, queue=None, log_dir="logs"
 
 
 if __name__ == '__main__':
-    connect(MONGODB_DATABASE)
+    connect(MONGODB_DATABASE, host=MONGODB_IP)
     args = parser.parse_args()
     config_data = dict()
     with open(args.config) as config_file_handle:
