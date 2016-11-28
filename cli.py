@@ -26,12 +26,13 @@ parser.add_argument("-c", "--config", type=str, default="./config.json")
 parser.add_argument("-q", "--queue", type=str, default=None)
 
 
-def mk_pilot(data_volume, command, docker_image_name, queue=None, log_dir="logs", username=None):
+def mk_pilot(data_volume, namespace, command, docker_image_name, queue=None, log_dir="logs", username=None):
     """
     mk_pilot will create an object in the database with the meta data, create a script for torque,
     and submit the job to the torque queue.
 
     :param data_volume: mount point to bound as /data to the docker container, usually /data
+    :param namespace: something like docker_user
     :param command: command to be executed in the container
     :param docker_image_name: name of docker image container to run the command in
     :param queue: the torque queue to submit the job, if ommitted Torque will decide
@@ -44,7 +45,7 @@ def mk_pilot(data_volume, command, docker_image_name, queue=None, log_dir="logs"
     task_object.c_id = int(time.time())
     task_object.command = command
     task_object.log_file = os.path.abspath(
-        os.path.join(data_volume, log_dir, str(task_object.c_id) + ".log"))
+        os.path.join(data_volume, namespace, log_dir, str(task_object.c_id) + ".log"))
     task_object.work_dir = "/opt"
     if username:
         task_object.user = username
@@ -98,4 +99,4 @@ if __name__ == '__main__':
     else:
         queue = args.queue
 
-    mk_pilot(data_volume, args.cmd[0], docker_image_name, queue, username=config_data.get('username'))
+    mk_pilot(data_volume, "docker_user", args.cmd[0], docker_image_name, queue, username=config_data.get('username'))

@@ -2,7 +2,7 @@
   "username": "wghilliard",
   "default_image": "temp_close",
   "log_dir": "wghilliard/logs",
-  "data_volume": "/data/docker_user",
-  "inner_data_volume": "/data",
+  "data_volume": "/data",
+  "namespace": "docker_user/",
   "queue": "cpuqueue"
 }
