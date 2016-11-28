@@ -28,7 +28,7 @@ parser.add_argument("-q", "--queue", type=str, default=None)
 
 def mk_pilot(data_volume, command, docker_image_name, queue=None, username=None):
     """
-    Main will create an object in the database with the meta data, create a script for torque,
+    mk_pilot will create an object in the database with the meta data, create a script for torque,
     and submit the job to the torque queue.
 
     :param data_volume: mount point to bound as /data to the docker container, usually /data
@@ -74,15 +74,13 @@ def mk_pilot(data_volume, command, docker_image_name, queue=None, username=None)
 
 
 if __name__ == '__main__':
-
-    # init
     connect(MONGODB_DATABASE)
     args = parser.parse_args()
     config_data = dict()
     with open(args.config) as config_file_handle:
         config_data = json.load(config_file_handle)
 
-    # setup parameters for main()
+    # setup parameters for mk_pilot()
     if args.image is None:
         docker_image_name = config_data['default_image']
 

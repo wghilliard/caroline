@@ -37,6 +37,11 @@ def main(c_id):
         print("cannot find c_id {0} in {1}".format(c_id, MONGODB_DATABASE))
         return
     task_object.start()
+
+    # TODO multiple separate commands?
+    # for task in task_object.commands:
+    #     run_task(task_object)
+
     if run_task(task_object):
         task_object.stop()
     else:

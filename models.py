@@ -2,7 +2,7 @@
 This file contains models to be used as an ORM for the "caroline" database in MongoDB
 """
 
-from mongoengine import Document, StringField, IntField, DictField, DateTimeField, BooleanField
+from mongoengine import Document, ListField, StringField, IntField, DictField, DateTimeField, BooleanField
 import datetime
 
 
@@ -13,6 +13,7 @@ class Task(Document):
 
     c_id = IntField()
     command = StringField()
+    cmd_list = ListField(StringField())
     log_file = StringField()
     work_dir = StringField()
 
