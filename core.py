@@ -13,8 +13,7 @@ Workflow:
 
 import argparse
 import os
-# import json
-from config import MONGODB_DATABASE
+from config import MONGODB_DATABASE, MONGODB_IP
 from mongoengine import connect
 import subprocess as sp
 from models import Task
@@ -22,18 +21,21 @@ from models import Task
 # ARG PARSE
 parser = argparse.ArgumentParser(description="caaarroollline")
 parser.add_argument('-c', '--task-path', type=str, default='./task.json', help="path to task.json file")
-parser.add_argument('object_id', type=str, help='an integer for the accumulator')
+parser.add_argument('c_id', type=str, help='an integer for the accumulator')
 
 
-def main(object_id):
+def main(c_id):
     # MONGODB
     try:
-        connect(MONGODB_DATABASE)
+        connect(MONGODB_DATABASE, host=MONGODB_IP)
     except Exception as e:
         print(e)
         return
 
-    task_object = Task.objects(pk=object_id).first()
+    task_object = Task.objects(c_id=c_id).first()
+    if task_object is None:
+        print("cannot find c_id {0} in {1}".format(c_id, MONGODB_DATABASE))
+        return
     task_object.start()
     if run_task(task_object):
         task_object.stop()
@@ -65,4 +67,4 @@ def run_task(task):
 
 if __name__ == '__main__':
     args = parser.parse_args()
-    main(args.object_id)
+    main(args.c_id)

@@ -9,6 +9,8 @@ import datetime
 class Task(Document):
     meta = {'collection': 'tasks'}
     misc = DictField()
+    username = StringField()
+
     c_id = IntField()
     command = StringField()
     log_file = StringField()

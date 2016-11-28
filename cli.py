@@ -26,7 +26,7 @@ parser.add_argument("-c", "--config", type=str, default="./config.json")
 parser.add_argument("-q", "--queue", type=str, default=None)
 
 
-def mk_pilot(data_volume, command, docker_image_name, queue=None):
+def mk_pilot(data_volume, command, docker_image_name, queue=None, username=None):
     """
     Main will create an object in the database with the meta data, create a script for torque,
     and submit the job to the torque queue.
@@ -35,20 +35,24 @@ def mk_pilot(data_volume, command, docker_image_name, queue=None):
     :param command: command to be executed in the container
     :param docker_image_name: name of docker image container to run the command in
     :param queue: the torque queue to submit the job, if ommitted Torque will decide
-    :return: True if job was created and submitted, False if error
+    :param username: the username to be associated with the task
+    :return: True if task was created and submitted, False if error
     """
+
     task_object = Task()
     task_object.c_id = int(time.time())
     task_object.command = command
     task_object.log_file = os.path.abspath(
         os.path.join(data_volume, config_data['log_dir'], str(task_object.c_id) + ".log"))
     task_object.work_dir = "/opt"
+    if username:
+        task_object.user = username
 
     task_object.save()
 
-    docker_init_cmd = "docker run -itdv {0}:/data {1} python /opt/caroline/core.py {2}".format(data_volume,
-                                                                                               docker_image_name,
-                                                                                               task_object.c_id)
+    docker_init_cmd = "docker run -itdv {0}:/data {1} python3 /opt/caroline/core.py {2}".format(data_volume,
+                                                                                                docker_image_name,
+                                                                                                task_object.c_id)
 
     temp_file_path = os.path.join("/tmp", "{0}.run".format(task_object.c_id))
 
@@ -95,4 +99,4 @@ if __name__ == '__main__':
     else:
         queue = args.queue
 
-    mk_pilot(data_volume, args.cmd[0], docker_image_name, queue)
+    mk_pilot(data_volume, args.cmd[0], docker_image_name, queue, username=config_data.get('username'))

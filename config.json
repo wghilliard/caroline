@@ -1,6 +1,6 @@
 {
   "username": "wghilliard",
-  "default_image": "ubuntu:latest",
+  "default_image": "temp_close",
   "log_dir": "wghilliard/logs",
   "data_volume": "/data",
   "queue": "cpuqueue"
