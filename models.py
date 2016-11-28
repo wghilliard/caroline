@@ -13,7 +13,7 @@ class Task(Document):
 
     c_id = IntField()
     command = StringField()
-    cmd_list = ListField(StringField())
+    # cmd_list = ListField(StringField())
     log_file = StringField()
     work_dir = StringField()
 

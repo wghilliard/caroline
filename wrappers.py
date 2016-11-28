@@ -41,6 +41,8 @@ def lariatsoft_one(gen_fcl_file_path, conv_fcl_file_path, out_path, n_events, in
         config_data = json.load(config_file_handle)
 
     data_volume = config_data.get('data_volume')
+    inner_data_volume = config_data.get('inner_data_volume')
+
 
     tmp_fcl_file_path = os.path.join(data_volume, "docker_user/fcl_files")
     try:
@@ -67,22 +69,22 @@ def lariatsoft_one(gen_fcl_file_path, conv_fcl_file_path, out_path, n_events, in
     except Exception as e:
         print(e)
 
-    phase_one_output_path = os.path.join(data_volume, out_path, "single_gen_{0}.root".format(index))
+    phase_one_output_path = os.path.join(inner_data_volume, out_path, "single_gen_{0}.root".format(index))
     gen_fcl_file_base = os.path.basename(gen_fcl_file_path)
     commands = list()
     commands.append(
         "cp /data/docker_user/fcl_files/{0} /products/dev && source /etc/lariatsoft_setup.sh && lar -c /products/dev/{0} -n {1} -o {2}".format(
             gen_fcl_file_base, n_events, phase_one_output_path))
 
-    phase_two_output_path = os.path.join(data_volume, out_path, "wire_dump_{0}.root".format(index))
+    phase_two_output_path = os.path.join(inner_data_volume, out_path, "wire_dump_{0}.root".format(index))
     conv_fcl_file_base = os.path.basename(conv_fcl_file_path)
     commands.append(
         "cp /data/docker_user/fcl_files/{0} /products/dev && source /etc/lariatsoft_setup.sh && lar -c /products/dev/{0} -s {1} -T {2}".format(
             conv_fcl_file_base, phase_one_output_path, phase_two_output_path))
 
     # Assuming the python is there?
-    fuck = os.path.join(data_volume, out_path, "2D_h5")
-    this = os.path.join(data_volume, out_path, "3D_h5")
+    fuck = os.path.join(inner_data_volume, out_path, "2D_h5")
+    this = os.path.join(inner_data_volume, out_path, "3D_h5")
 
     commands.append("python /opt/Wirecell_Root_Procssing/ProcessRootFile_WireCell.py {0} {1}".format(
         phase_two_output_path, fuck, this))
@@ -98,4 +100,4 @@ def lariatsoft_one(gen_fcl_file_path, conv_fcl_file_path, out_path, n_events, in
 
 if __name__ == "__main__":
     connect(MONGODB_DATABASE, host=MONGODB_IP)
-    lariatsoft_one("/Users/wghilliard/one.fcl", "/Users/wghilliard/two.fcl", "docker_user/10000", 5, 1)
+    lariatsoft_one("/Users/wghilliard/one.fcl", "/Users/wghilliard/two.fcl", "10000", 5, 1)
