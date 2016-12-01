@@ -1,5 +1,5 @@
 """
-wrappers should be something that builds commands to be used with cli.mk_pilot
+a wrapper should be something that builds commands to be used with cli.mk_pilot
 """
 
 from cli import mk_pilot
@@ -84,11 +84,12 @@ def lariatsoft_one(gen_fcl_file_path, conv_fcl_file_path, out_path, n_events, in
             conv_fcl_file_base, phase_one_output_path, phase_two_output_path))
 
     # Assuming the python is there?
-    fuck = os.path.join(data_volume, namespace, out_path, "2D_h5")
-    this = os.path.join(data_volume, namespace, out_path, "3D_h5")
+    rick = os.path.join(data_volume, namespace, out_path, "2D_h5")
+    morty = os.path.join(data_volume, namespace, out_path, "3D_h5")
 
-    commands.append("python /opt/Wirecell_Root_Procssing/ProcessRootFile_WireCell.py {0} {1}".format(
-        phase_two_output_path, fuck, this))
+    commands.append(
+        "source /opt/root/bin/thisroot.sh && python /opt/Wirecell_Root_Procssing/ProcessRootFile_WireCell.py {0} {1} {2}".format(
+            phase_two_output_path, rick, morty))
 
     # TODO this is atrocious, please fix this
     command_final = " && ".join(commands)
@@ -99,6 +100,78 @@ def lariatsoft_one(gen_fcl_file_path, conv_fcl_file_path, out_path, n_events, in
     return True
 
 
+def lariatsoft_two(in_path, conv_fcl_file_path, out_path):
+    """
+    lar_two should be used to convert root files to h5 using the new h5 method?
+    :param in_path: path to the root file that should be convereted
+    :param conv_fcl_file_path: path the to fickle file that will be used
+    :param out_path: path that the file should be written to
+    :return:
+    """
+
+    config_data = dict()
+    with open("./config.json") as config_file_handle:
+        config_data = json.load(config_file_handle)
+
+    data_volume = config_data.get('data_volume')
+    namespace = config_data.get('namespace')
+
+    conv_fcl_file_path = os.path.abspath(conv_fcl_file_path)
+    tmp_fcl_file_path = os.path.join(data_volume, namespace, "fcl_files/")
+
+    try:
+        shutil.copy(conv_fcl_file_path, tmp_fcl_file_path)
+    except shutil.Error as e:
+        print(e)
+        pass
+    except Exception as e:
+        print(e)
+        return False
+
+    # copy python? not for now (should use git instead)
+    try:
+        mkdir_p(os.path.join(data_volume, out_path))
+    except Exception as e:
+        print(e)
+
+    phase_two_output_path = os.path.join(data_volume, namespace, out_path,
+                                         "wire_dump_{0}.root".format(in_path.replace(".root", "").split("_")[-1]))
+
+    conv_fcl_file_base = os.path.basename(conv_fcl_file_path)
+
+    commands = list()
+    # use data_volume, namespace,
+    commands.append(
+        "cp /data/docker_user/fcl_files/{0} /products/dev && source /etc/lariatsoft_setup.sh && lar -c /products/dev/{0} -s {1} -T {2}".format(
+            conv_fcl_file_base, in_path, phase_two_output_path))
+
+    # Assuming the python is there?
+    rick = os.path.join(data_volume, namespace, out_path, "2D_h5")
+    morty = os.path.join(data_volume, namespace, out_path, "3D_h5")
+
+    commands.append(
+        "source /opt/root/bin/thisroot.sh && python /opt/Wirecell_Root_Procssing/ProcessRootFile_WireCell.py {0} {1} {2}".format(
+            phase_two_output_path, rick, morty))
+
+    # TODO this is atrocious, please fix this
+    command_final = " && ".join(commands)
+
+    print(command_final)
+    # mk_pilot(data_volume, namespace, command_final, config_data.get('default_image'))
+
+    return True
+
+
+def dlkit():
+    return
+
+
+def p2n():
+    return True
+
+
 if __name__ == "__main__":
     connect(MONGODB_DATABASE, host=MONGODB_IP)
-    lariatsoft_one("/Users/wghilliard/one.fcl", "/Users/wghilliard/two.fcl", "10000", 5, 1)
+    # lariatsoft_one("/Users/wghilliard/one.fcl", "/Users/wghilliard/two.fcl", "10000", 5, 1)
+    lariatsoft_two("/Users/wghilliard/single_gen_2.root", "/data/docker_user/fcl_files/WireDump_3D.fcl",
+                   "/data/docker_user/grayson_test_2")
