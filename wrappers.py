@@ -71,7 +71,7 @@ def lariatsoft_one(gen_fcl_file_path, conv_fcl_file_path, out_path, n_events, in
     # copy python? not for now (should use git instead)
 
     # make output directory?
-    tmp_out_path = os.path.join(data_volume, namespace, out_path, c_id)
+    tmp_out_path = os.path.join(data_volume, namespace, out_path, str(c_id))
     try:
         mkdir_p(tmp_out_path)
     except Exception as e:
@@ -141,7 +141,7 @@ def lariatsoft_two(in_path, conv_fcl_file_path, out_path):
     # copy python? not for now (should use git instead)
 
 
-    tmp_out_path = os.path.join(data_volume, namespace, out_path, c_id)
+    tmp_out_path = os.path.join(data_volume, namespace, out_path, str(c_id))
     try:
         mkdir_p(tmp_out_path)
     except Exception as e:
