@@ -2,6 +2,9 @@ Caroline
 ====
 Version 1.0
 
+Python 3.X
+
+## FAQ
 
 ##### What is Caroline?
 Caroline is a wrapper that facilitates job submission to Torque for Docker containers!
@@ -34,12 +37,56 @@ NOTE: a connection to the Mongo database is required!!
     from mongoengine import connect
     connect("caroline")
 
+BETA NOTE: a connection to InfluxDB is required!!
+
+## Install
+
+##### Host Install
+Clone
+
+    git clone github.com/wghilliard/caroline.git
+
+Install Python3 dependencies.
+    
+    pip3 install -r requirements.txt
+    
+Ensure a MongoDB daemon is running!
+
+    mongod
+
+Configure `caroline/config.py` and `caroline/config.json`
+    
+BETA: Ensure an InfluxDB daemon is running!
+ 
+    influxd
+
+
+#### Container Install
+
+Clone
+
+    git clone github.com/wghilliard/caroline.git
+
+Configure `caroline/config.py` and `caroline/config.json`
+
+## Integration
+
 ##### Example:
 
     from caroline.wrappers import lariatsoft_two
     lariatsoft_two("/Users/wghilliard/single_gen_2.root", "/data/docker_user/fcl_files/WireDump_3D.fcl",
                    "/data/docker_user/grayson_test_2")
+                  
                    
+NOTE: a connection to MongoDB is required!!
+
+    from mongoengine import connect
+    connect("caroline")
+
+BETA NOTE: a connection to InfluxDB is required!!
+
+    
+
 ##### Extra
 - All container logs are stored in `$DATA_VOLUME/$NAMESPACE/logs/$C_ID`
 - This is version 1.0 so there might be bugs! Please open github issues if you find any!

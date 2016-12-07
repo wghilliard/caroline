@@ -4,5 +4,5 @@
   "log_dir": "logs",
   "data_volume": "/data",
   "namespace": "docker_user/",
-  "queue": "cpuqueue"
+  "queue": "cpuqueue",
 }

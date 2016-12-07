@@ -17,6 +17,7 @@ from config import MONGODB_DATABASE, MONGODB_IP
 from mongoengine import connect
 import subprocess as sp
 from models import Task
+from logging_utils import send_to_influx
 
 # ARG PARSE
 parser = argparse.ArgumentParser(description="caaarroollline")
@@ -47,6 +48,9 @@ def main(c_id):
     else:
         # do something?
         pass
+
+    if task_object.influx_measurement:
+        send_to_influx(task_object)
 
     return
 

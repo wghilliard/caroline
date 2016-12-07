@@ -3,27 +3,31 @@ This file contains models to be used as an ORM for the "caroline" database in Mo
 """
 
 from mongoengine import Document, ListField, StringField, IntField, DictField, DateTimeField, BooleanField
+
 import datetime
 
 
 class Task(Document):
     meta = {'collection': 'tasks'}
     misc = DictField()
-    username = StringField()
+    username = StringField(default=None)
+    name = StringField(default=None)
+    influx_measurement = StringField(default=None)
 
-    c_id = IntField()
+    c_id = IntField(required=True)
     command = StringField()
     # cmd_list = ListField(StringField())
+
     log_file = StringField()
-    work_dir = StringField()
+    work_dir = StringField(default=None)
 
-    start_time = DateTimeField()
-    end_time = DateTimeField()
+    start_time = DateTimeField(default=None)
+    end_time = DateTimeField(default=None)
 
-    lock = BooleanField()
-    complete = BooleanField()
-    error = StringField()
-    retry = IntField()
+    lock = BooleanField(default=False)
+    complete = BooleanField(default=False)
+    error = StringField(default=None)
+    retry = IntField(default=0)
 
     def start(self):
         self.lock = True
