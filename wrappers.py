@@ -91,14 +91,14 @@ def lariatsoft_one(gen_fcl_file_path, conv_fcl_file_path, out_path, n_events, in
     commands.append(
         "cp /data/docker_user/fcl_files/{0} /products/dev && source /etc/lariatsoft_setup.sh && lar -c /products/dev/{0} -s {1} -T {2}".format(
             conv_fcl_file_base, phase_one_output_path, phase_two_output_path))
-
-    # Assuming the python is there?
-    rick = os.path.join(tmp_out_path, "2D_h5")
-    morty = os.path.join(tmp_out_path, "3D_h5")
-
-    commands.append(
-        "source /opt/root/bin/thisroot.sh && python /opt/Wirecell_Root_Procssing/ProcessRootFile_WireCell.py {0} {1} {2}".format(
-            phase_two_output_path, rick, morty))
+    #
+    # # Assuming the python is there?
+    # rick = os.path.join(tmp_out_path, "2D_h5")
+    # morty = os.path.join(tmp_out_path, "3D_h5")
+    #
+    # commands.append(
+    #     "source /opt/root/bin/thisroot.sh && python /opt/Wirecell_Root_Procssing/ProcessRootFile_WireCell.py {0} {1} {2}".format(
+    #         phase_two_output_path, rick, morty))
 
     # TODO this is atrocious, please fix this
     # command_final = " && ".join(commands)
@@ -158,15 +158,15 @@ def lariatsoft_two(in_path, conv_fcl_file_path, out_path):
         "cp /data/docker_user/fcl_files/{0} /products/dev && source /etc/lariatsoft_setup.sh && lar -c /products/dev/{0} -s {1} -T {2}".format(
             conv_fcl_file_base, in_path, phase_two_output_path))
 
-    # Assuming the python is there?
-    rick = os.path.join(tmp_out_path, "2D_h5")
-    morty = os.path.join(tmp_out_path, "3D_h5")
+    # # Assuming the python is there?
+    # rick = os.path.join(tmp_out_path, "2D_h5")
+    # morty = os.path.join(tmp_out_path, "3D_h5")
+    #
+    # commands.append(
+    #     "source /opt/root/bin/thisroot.sh && python /opt/Wirecell_Root_Procssing/ProcessRootFile_WireCell.py {0} {1} {2}".format(
+    #         phase_two_output_path, rick, morty))
 
-    commands.append(
-        "source /opt/root/bin/thisroot.sh && python /opt/Wirecell_Root_Procssing/ProcessRootFile_WireCell.py {0} {1} {2}".format(
-            phase_two_output_path, rick, morty))
-
-    # TODO this is atrocious, please fix this
+    # TODO this is atrocious, please fix this - DONE
     # command_final = " && ".join(commands)
 
     print("pilot command: \n", commands)
@@ -174,6 +174,44 @@ def lariatsoft_two(in_path, conv_fcl_file_path, out_path):
              queue="cpuqueue", c_id=c_id)
 
     return True
+
+
+def wire_cell(in_path, out_path):
+    """
+
+    :param in_path:
+    :param out_path:
+    :return:
+    """
+    c_id = int(time.time())
+
+    config_data = dict()
+    with open("./config.json") as config_file_handle:
+        config_data = json.load(config_file_handle)
+
+    data_volume = config_data.get('data_volume')
+    namespace = config_data.get('namespace')
+
+    tmp_out_path = os.path.join(data_volume, namespace, out_path, str(c_id))
+
+    commands = list()
+
+    # # Assuming the python is there?
+    rick = os.path.join(tmp_out_path, "2D_h5")
+    morty = os.path.join(tmp_out_path, "3D_h5")
+
+    commands.append(
+        "source /opt/root/bin/thisroot.sh && python /opt/Wirecell_Root_Procssing/ProcessRootFile_WireCell.py {0} {1} {2}".format(
+            in_path, rick, morty))
+
+    print("pilot command: \n", commands)
+    if mk_pilot(data_volume, namespace, commands, "wghilliard/wire_cell:1.0", influx_measurement="wire_cell",
+                queue="cpuqueue", c_id=c_id):
+
+        return True
+
+    else:
+        return False
 
 
 def dlkit():
