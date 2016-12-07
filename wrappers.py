@@ -23,9 +23,12 @@ def lariatsoft_one(gen_fcl_file_path, conv_fcl_file_path, out_path, n_events, in
     1. copy a fickle file from a host directory to $DATA_VOLUME/docker_user/fcl_files
     2. build command
     3. execute mk_pilot
+
+    make sure out_path is writeable!
+
     :param gen_fcl_file_path: a path on the host that ends with .fcl (used for generation phase)
     :param conv_fcl_file_path: a path on the host that ends with .fcl (used for conversion phase)
-    :param out_path: a path with config_data.get('data_volume') as the root ex "$DATA_VOLUME/docker_user/electron/"
+    :param out_path: a path with config_data.get('data_volume') as the root ex "$DATA_VOLUME/$NAMESPACE/electron/"
     :param n_events: integer number of events that should be generated
     :param index: single_gen_X where X is the index
     :return:
@@ -63,8 +66,10 @@ def lariatsoft_one(gen_fcl_file_path, conv_fcl_file_path, out_path, n_events, in
         return False
 
     # copy python? not for now (should use git instead)
+
+    # make output directory?
     try:
-        mkdir_p(os.path.join(data_volume, out_path))
+        mkdir_p(os.path.join(data_volume, namespace, out_path))
     except Exception as e:
         print(e)
 

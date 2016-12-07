@@ -50,7 +50,7 @@ def main(c_id):
         # do something?
         pass
 
-    if task_object.influx_measurement:
+    if task_object.influx_measurement is not None:
         send_to_influx(task_object)
 
     return
