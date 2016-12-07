@@ -16,7 +16,7 @@ class Task(Document):
 
     c_id = IntField(required=True)
     command = StringField()
-    # cmd_list = ListField(StringField())
+    cmd_list = ListField(StringField())
 
     log_file = StringField()
     work_dir = StringField(default=None)
@@ -24,6 +24,7 @@ class Task(Document):
     start_time = DateTimeField(default=None)
     end_time = DateTimeField(default=None)
 
+    status = StringField(default=None)
     lock = BooleanField(default=False)
     complete = BooleanField(default=False)
     error = StringField(default=None)
@@ -42,4 +43,8 @@ class Task(Document):
 
     def set_error(self, error):
         self.error = str(error)
+        self.save()
+
+    def set_status(self, cmd):
+        self.status = cmd
         self.save()

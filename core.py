@@ -60,8 +60,12 @@ def run_task(task):
         if task.work_dir is not None:
             os.chdir(task.work_dir)
         with open(task.log_file, 'a+') as log_file_handle:
-            print(task.command, file=log_file_handle)
-            sp.call(task.command, stderr=log_file_handle, stdout=log_file_handle, shell=True)
+
+            for cmd in task.cmd_list:
+                print(cmd, file=log_file_handle)
+                task.set_status(cmd)
+                sp.call(cmd, stderr=log_file_handle, stdout=log_file_handle, shell=True)
+
     except OSError as e:
         print(e)
         task.set_error(e)
