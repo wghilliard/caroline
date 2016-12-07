@@ -8,6 +8,7 @@ Caroline is a wrapper that facilitates job submission to Torque for Docker conta
 
 ##### How does it work?
 Caroline creates performs a 3 step process to make magic happen:
+
 1. A wrapper for `cli.mk_pilot` is created for a specific job that specifies 4 things
     1. A data volume to mount to the Docker container. (e.x. `/data`)
     2. A name space (if any) to use in the volume. (e.x. `docker_user`)

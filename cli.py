@@ -52,7 +52,7 @@ def mk_pilot(data_volume, namespace, command, docker_image_name, queue=None, log
 
     task_object.save()
 
-    docker_init_cmd = "docker run -v {0}:/data --name={3}--net=\"host\" {1} python3 /opt/caroline/core.py {2}".format(
+    docker_init_cmd = "docker run -v {0}:/data --name={3} --net=\"host\" {1} python3 /opt/caroline/core.py {2}".format(
         data_volume,
         docker_image_name,
         task_object.c_id, task_object.c_id)
