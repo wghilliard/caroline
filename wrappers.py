@@ -95,7 +95,7 @@ def lariatsoft_one(gen_fcl_file_path, conv_fcl_file_path, out_path, n_events, in
     # command_final = " && ".join(commands)
 
     # print(command_final)
-    mk_pilot(data_volume, namespace, commands, config_data.get('default_image'))
+    mk_pilot(data_volume, namespace, commands, config_data.get('default_image'), influx_measurement="lariatsoft_one")
 
     return True
 
@@ -157,7 +157,7 @@ def lariatsoft_two(in_path, conv_fcl_file_path, out_path):
     # command_final = " && ".join(commands)
 
     print("pilot command: \n", commands)
-    mk_pilot(data_volume, namespace, commands, config_data.get('default_image'))
+    mk_pilot(data_volume, namespace, commands, config_data.get('default_image'), influx_measurement="lariatsoft_two")
 
     return True
 
@@ -173,5 +173,6 @@ def p2n():
 if __name__ == "__main__":
     connect(MONGODB_DATABASE, host=MONGODB_IP)
     # lariatsoft_one("/Users/wghilliard/one.fcl", "/Users/wghilliard/two.fcl", "10000", 5, 1)
+    # lariatsoft_one("/data/docker_user/fcl_files/C_geant4_pion-0.fcl", "/data/docker_user/fcl_files/WireDump_3D.fcl", 10, 22)
     lariatsoft_two("/Users/wghilliard/single_gen_2.root", "/data/docker_user/fcl_files/WireDump_3D.fcl",
                    "/data/docker_user/grayson_test_2")
