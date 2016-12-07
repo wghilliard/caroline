@@ -27,8 +27,7 @@ parser.add_argument("-q", "--queue", type=str, default=None)
 
 
 def mk_pilot(data_volume, namespace, cmd_list, docker_image_name, queue=None, log_dir="logs", username=None,
-             influx_measurement=None):
-
+             influx_measurement=None, c_id=None):
     """
     mk_pilot will create an object in the database with the meta data, create a script for torque,
     and submit the job to the torque queue.
@@ -44,7 +43,17 @@ def mk_pilot(data_volume, namespace, cmd_list, docker_image_name, queue=None, lo
     """
 
     task_object = Task()
-    task_object.c_id = int(time.time())
+
+    if c_id is None:
+        task_object.c_id = int(time.time())
+    else:
+        try:
+            task_object.c_id = int(c_id)
+        except Exception as e:
+            print(e)
+            print("INFO: int(c_id) failed")
+            return False
+
     task_object.cmd_list = cmd_list
     task_object.log_file = os.path.abspath(
         os.path.join(data_volume, namespace, log_dir, str(task_object.c_id) + ".log"))

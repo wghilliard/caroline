@@ -9,6 +9,7 @@ import os
 from utils import mkdir_p
 from mongoengine import connect
 from config import MONGODB_DATABASE, MONGODB_IP
+import time
 
 
 def lariatsoft_one(gen_fcl_file_path, conv_fcl_file_path, out_path, n_events, index):
@@ -35,6 +36,8 @@ def lariatsoft_one(gen_fcl_file_path, conv_fcl_file_path, out_path, n_events, in
     """
     # python3 ./cli.py --cmd 'cp /data/docker_user/fcl_files/MC_geant4_pion-0.fcl
     # /products/dev && source /etc/lariatsoft_setup.sh && lar -c /products/dev/MC_geant4_pion-0.fcl -n 5 -o /data/docker_user/single_gen_12.root'
+
+    c_id = int(time.time())
 
     gen_fcl_file_path = os.path.abspath(gen_fcl_file_path)
     conv_fcl_file_path = os.path.abspath(conv_fcl_file_path)
@@ -68,12 +71,13 @@ def lariatsoft_one(gen_fcl_file_path, conv_fcl_file_path, out_path, n_events, in
     # copy python? not for now (should use git instead)
 
     # make output directory?
+    tmp_out_path = os.path.join(data_volume, namespace, out_path, c_id)
     try:
-        mkdir_p(os.path.join(data_volume, namespace, out_path))
+        mkdir_p(tmp_out_path)
     except Exception as e:
         print(e)
 
-    phase_one_output_path = os.path.join(data_volume, namespace, out_path, "single_gen_{0}.root".format(index))
+    phase_one_output_path = os.path.join(tmp_out_path, "single_gen_{0}.root".format(index))
     gen_fcl_file_base = os.path.basename(gen_fcl_file_path)
     commands = list()
     # use data_volume, namespace
@@ -81,7 +85,7 @@ def lariatsoft_one(gen_fcl_file_path, conv_fcl_file_path, out_path, n_events, in
         "cp /data/docker_user/fcl_files/{0} /products/dev && source /etc/lariatsoft_setup.sh && lar -c /products/dev/{0} -n {1} -o {2}".format(
             gen_fcl_file_base, n_events, phase_one_output_path))
 
-    phase_two_output_path = os.path.join(data_volume, namespace, out_path, "wire_dump_{0}.root".format(index))
+    phase_two_output_path = os.path.join(tmp_out_path, "wire_dump_{0}.root".format(index))
     conv_fcl_file_base = os.path.basename(conv_fcl_file_path)
     # use data_volume, namespace,
     commands.append(
@@ -89,8 +93,8 @@ def lariatsoft_one(gen_fcl_file_path, conv_fcl_file_path, out_path, n_events, in
             conv_fcl_file_base, phase_one_output_path, phase_two_output_path))
 
     # Assuming the python is there?
-    rick = os.path.join(data_volume, namespace, out_path, "2D_h5")
-    morty = os.path.join(data_volume, namespace, out_path, "3D_h5")
+    rick = os.path.join(tmp_out_path, "2D_h5")
+    morty = os.path.join(tmp_out_path, "3D_h5")
 
     commands.append(
         "source /opt/root/bin/thisroot.sh && python /opt/Wirecell_Root_Procssing/ProcessRootFile_WireCell.py {0} {1} {2}".format(
@@ -99,8 +103,8 @@ def lariatsoft_one(gen_fcl_file_path, conv_fcl_file_path, out_path, n_events, in
     # TODO this is atrocious, please fix this
     # command_final = " && ".join(commands)
 
-    # print(command_final)
-    mk_pilot(data_volume, namespace, commands, config_data.get('default_image'), influx_measurement="lariatsoft_one", queue="cpuqueue")
+    mk_pilot(data_volume, namespace, commands, config_data.get('default_image'), influx_measurement="lariatsoft_one",
+             queue="cpuqueue", c_id=c_id)
 
     return True
 
@@ -113,6 +117,7 @@ def lariatsoft_two(in_path, conv_fcl_file_path, out_path):
     :param out_path: path that the file should be written to
     :return:
     """
+    c_id = int(time.time())
 
     config_data = dict()
     with open("./config.json") as config_file_handle:
@@ -134,12 +139,15 @@ def lariatsoft_two(in_path, conv_fcl_file_path, out_path):
         return False
 
     # copy python? not for now (should use git instead)
+
+
+    tmp_out_path = os.path.join(data_volume, namespace, out_path, c_id)
     try:
-        mkdir_p(os.path.join(data_volume, out_path))
+        mkdir_p(tmp_out_path)
     except Exception as e:
         print(e)
 
-    phase_two_output_path = os.path.join(data_volume, namespace, out_path,
+    phase_two_output_path = os.path.join(tmp_out_path,
                                          "wire_dump_{0}.root".format(in_path.replace(".root", "").split("_")[-1]))
 
     conv_fcl_file_base = os.path.basename(conv_fcl_file_path)
@@ -151,8 +159,8 @@ def lariatsoft_two(in_path, conv_fcl_file_path, out_path):
             conv_fcl_file_base, in_path, phase_two_output_path))
 
     # Assuming the python is there?
-    rick = os.path.join(data_volume, namespace, out_path, "2D_h5")
-    morty = os.path.join(data_volume, namespace, out_path, "3D_h5")
+    rick = os.path.join(tmp_out_path, "2D_h5")
+    morty = os.path.join(tmp_out_path, "3D_h5")
 
     commands.append(
         "source /opt/root/bin/thisroot.sh && python /opt/Wirecell_Root_Procssing/ProcessRootFile_WireCell.py {0} {1} {2}".format(
@@ -162,7 +170,8 @@ def lariatsoft_two(in_path, conv_fcl_file_path, out_path):
     # command_final = " && ".join(commands)
 
     print("pilot command: \n", commands)
-    mk_pilot(data_volume, namespace, commands, config_data.get('default_image'), influx_measurement="lariatsoft_two", queue="cpuqueue")
+    mk_pilot(data_volume, namespace, commands, config_data.get('default_image'), influx_measurement="lariatsoft_two",
+             queue="cpuqueue", c_id=c_id)
 
     return True
 
