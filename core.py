@@ -8,7 +8,8 @@ Workflow:
     3. build and save object to database (locking)
     4. run task (wat does this mean? bash? python? how is it passed in?)
     5. clean up environment?
-    6. update object in database
+    6. update object in MongoDB
+    7. add self to influx
 """
 
 import argparse

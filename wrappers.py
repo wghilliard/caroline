@@ -92,10 +92,10 @@ def lariatsoft_one(gen_fcl_file_path, conv_fcl_file_path, out_path, n_events, in
             phase_two_output_path, rick, morty))
 
     # TODO this is atrocious, please fix this
-    command_final = " && ".join(commands)
+    # command_final = " && ".join(commands)
 
     # print(command_final)
-    mk_pilot(data_volume, namespace, command_final, config_data.get('default_image'))
+    mk_pilot(data_volume, namespace, commands, config_data.get('default_image'))
 
     return True
 
@@ -154,10 +154,10 @@ def lariatsoft_two(in_path, conv_fcl_file_path, out_path):
             phase_two_output_path, rick, morty))
 
     # TODO this is atrocious, please fix this
-    command_final = " && ".join(commands)
+    # command_final = " && ".join(commands)
 
-    print("pilot command: \n", command_final)
-    mk_pilot(data_volume, namespace, command_final, config_data.get('default_image'))
+    print("pilot command: \n", commands)
+    mk_pilot(data_volume, namespace, commands, config_data.get('default_image'))
 
     return True
 

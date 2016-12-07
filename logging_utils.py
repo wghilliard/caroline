@@ -10,7 +10,7 @@ def send_to_influx(task):
     delta = task.end_time - task.start_time
 
     # TODO add in extra json from output
-    # TODO add nCommands = len(task.cmd_list)
+
     json_body = [
         {
             "measurement": str(task.influx_measurement),
@@ -23,7 +23,9 @@ def send_to_influx(task):
             },
             "time": str(task.start_time),
             "fields": {
-                "jobDuration": float(delta.total_seconds())
+                "jobDuration": float(delta.total_seconds()),
+                "numCommands": len(task.cmd_list)
+
             }
         }
     ]

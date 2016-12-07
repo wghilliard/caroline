@@ -28,6 +28,7 @@ parser.add_argument("-q", "--queue", type=str, default=None)
 
 def mk_pilot(data_volume, namespace, cmd_list, docker_image_name, queue=None, log_dir="logs", username=None,
              influx_measurement=None):
+
     """
     mk_pilot will create an object in the database with the meta data, create a script for torque,
     and submit the job to the torque queue.
@@ -37,7 +38,7 @@ def mk_pilot(data_volume, namespace, cmd_list, docker_image_name, queue=None, lo
     :param cmd_list: list() if commands to be executed in the container
     :param docker_image_name: name of docker image container to run the command in
     :param queue: the torque queue to submit the job, if omitted Torque will decide
-    :param log_dir: the directory inside the context of data_volume to write logs to
+    :param log_dir: the directory inside the context of data_volume to command output to
     :param username: the username to be associated with the task
     :return: True if task was created and submitted, False if error
     """
