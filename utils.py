@@ -1,5 +1,6 @@
 import os
 import errno
+import uuid
 
 
 def mkdir_p(path):
@@ -10,3 +11,7 @@ def mkdir_p(path):
             pass
         else:
             raise
+
+
+def generate_c_id():
+    return int(uuid.uuid4())

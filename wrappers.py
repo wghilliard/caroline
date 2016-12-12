@@ -6,7 +6,7 @@ from cli import mk_pilot
 import shutil
 import json
 import os
-from utils import mkdir_p
+from utils import mkdir_p, generate_c_id
 from mongoengine import connect
 from config import MONGODB_DATABASE, MONGODB_IP
 import time
@@ -37,7 +37,7 @@ def lariatsoft_one(gen_fcl_file_path, conv_fcl_file_path, out_path, n_events, in
     # python3 ./cli.py --cmd 'cp /data/docker_user/fcl_files/MC_geant4_pion-0.fcl
     # /products/dev && source /etc/lariatsoft_setup.sh && lar -c /products/dev/MC_geant4_pion-0.fcl -n 5 -o /data/docker_user/single_gen_12.root'
 
-    c_id = int(time.time())
+    c_id = generate_c_id()
 
     gen_fcl_file_path = os.path.abspath(gen_fcl_file_path)
     conv_fcl_file_path = os.path.abspath(conv_fcl_file_path)
@@ -117,7 +117,7 @@ def lariatsoft_two(in_path, conv_fcl_file_path, out_path):
     :param out_path: path that the file should be written to
     :return:
     """
-    c_id = int(time.time())
+    c_id = generate_c_id()
 
     config_data = dict()
     with open("./config.json") as config_file_handle:
@@ -183,7 +183,7 @@ def wire_cell(in_path, out_path):
     :param out_path:
     :return:
     """
-    c_id = int(time.time())
+    c_id = generate_c_id()
 
     config_data = dict()
     with open("./config.json") as config_file_handle:
