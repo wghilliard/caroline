@@ -37,11 +37,10 @@ def main(c_id):
         return
     task_object.start()
 
-    if run_task(task_object):
-        task_object.stop()
-    else:
-        # do something? retries and fault tolerance go here?
-        pass
+    # if run_task(task_object):
+    run_task(task_object)
+    task_object.stop()
+    # do something? retries and fault tolerance go here?
 
     if task_object.influx_measurement is not None:
         send_to_influx(task_object, influxdb_ip, misc=task_object.misc)
