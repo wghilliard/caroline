@@ -14,7 +14,7 @@ Workflow:
 
 import argparse
 import os
-from config import MONGODB_DATABASE, MONGODB_IP
+from config import MONGODB_DATABASE
 from mongoengine import connect
 import subprocess as sp
 from models import Task
@@ -27,9 +27,11 @@ parser.add_argument('c_id', type=str, help='an integer for the accumulator')
 
 
 def main(c_id):
+    mongodb_ip, influxdb_ip = get_env_vars()
+
     # MONGODB
     try:
-        connect(MONGODB_DATABASE, host=MONGODB_IP)
+        connect(MONGODB_DATABASE, host=mongodb_ip)
     except Exception as e:
         print(e)
         return
@@ -51,7 +53,7 @@ def main(c_id):
         pass
 
     if task_object.influx_measurement is not None:
-        send_to_influx(task_object)
+        send_to_influx(task_object, influxdb_ip, misc=task_object.misc)
 
     return
 
@@ -77,6 +79,21 @@ def run_task(task):
         return False
 
     return True
+
+
+def get_env_vars():
+    try:
+        mongodb_ip = os.environ['MONGODB_IP']
+
+    except KeyError:
+        mongodb_ip = "localhost"
+
+    try:
+        influxdb_ip = os.environ['INFLUXDB_IP']
+    except KeyError:
+        influxdb_ip = "localhost"
+
+    return mongodb_ip, influxdb_ip
 
 
 if __name__ == '__main__':

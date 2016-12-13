@@ -3,16 +3,16 @@ this is the command line interface to
 - add tasks
     - to the database
     - to torque
-- build a docker container?
+- build a docker container? Dockerfile is ready!
 """
 
 import os
 import argparse
 from models import Task
 from mongoengine import connect
-from config import MONGODB_DATABASE, MONGODB_IP
+from config import MONGODB_DATABASE, INFLUX_IP, MONGODB_IP
 import json
-import time
+from utils import generate_c_id
 import subprocess as sp
 
 # ARG PARSE
@@ -27,7 +27,7 @@ parser.add_argument("-q", "--queue", type=str, default=None)
 
 
 def mk_pilot(data_volume, namespace, cmd_list, docker_image_name, queue=None, log_dir="logs", username=None,
-             influx_measurement=None, c_id=None):
+             influx_measurement=None, c_id=None, misc=None):
     """
     mk_pilot will create an object in the database with the meta data, create a script for torque,
     and submit the job to the torque queue.
@@ -39,13 +39,16 @@ def mk_pilot(data_volume, namespace, cmd_list, docker_image_name, queue=None, lo
     :param queue: the torque queue to submit the job, if omitted Torque will decide
     :param log_dir: the directory inside the context of data_volume to command output to
     :param username: the username to be associated with the task
+    :param influx_measurement:
+    :param c_id: if you have a preset c_id you want to be used, else it will be generated
+    :param misc: extra info in dictionary form to save to mongo and influx
     :return: True if task was created and submitted, False if error
     """
 
     task_object = Task()
 
     if c_id is None:
-        task_object.c_id = int(time.time())
+        task_object.c_id = generate_c_id()
     else:
         try:
             task_object.c_id = int(c_id)
@@ -53,6 +56,9 @@ def mk_pilot(data_volume, namespace, cmd_list, docker_image_name, queue=None, lo
             print(e)
             print("INFO: int(c_id) failed")
             return False
+
+    if misc is not None:
+        task_object.misc = misc
 
     task_object.cmd_list = cmd_list
     task_object.log_file = os.path.abspath(
@@ -65,11 +71,10 @@ def mk_pilot(data_volume, namespace, cmd_list, docker_image_name, queue=None, lo
         task_object.user = username
 
     task_object.save()
-
-    docker_init_cmd = "docker run -v {0}:/data --name={3} --net=\"host\" {1} python3 /opt/caroline/core.py {2}".format(
-        data_volume,
-        docker_image_name,
-        task_object.c_id, task_object.c_id)
+    docker_image_pull = "docker pull {0}".format(docker_image_name)
+    docker_init_cmd = "docker run -v {0}:/data --name={3} --net=\"host\" -e MONGODB_IP={4} -e INFLUXDB_IP={5} {1} python3 /opt/caroline/core.py {2}".format(
+        data_volume, docker_image_name, task_object.c_id,
+        task_object.c_id, MONGODB_IP, INFLUX_IP)
 
     temp_file_path = os.path.join("/tmp", "{0}.run".format(task_object.c_id))
 
@@ -78,6 +83,7 @@ def mk_pilot(data_volume, namespace, cmd_list, docker_image_name, queue=None, lo
     with open(temp_file_path, "w+") as temp_file_handle:
         if queue is not None:
             print("#PBS -q {0}".format(queue), file=temp_file_handle)
+        print(docker_image_pull, file=temp_file_handle)
         print(docker_init_cmd, file=temp_file_handle)
 
     try:

@@ -1,15 +1,11 @@
 from influxdb import InfluxDBClient
-from config import INFLUX_DB, INFLUX_IP
-
-influx_client = InfluxDBClient(host=INFLUX_IP, database=INFLUX_DB)
+from config import INFLUX_DB
 
 
-def send_to_influx(task):
-    client = InfluxDBClient(host='localhost', port=8086, database=INFLUX_DB)
+def send_to_influx(task, influxdb_ip, misc=None):
+    client = InfluxDBClient(host=influxdb_ip, port=8086, database=INFLUX_DB)
 
     delta = task.end_time - task.start_time
-
-    # TODO add in extra json from output
 
     json_body = [
         {
@@ -17,7 +13,6 @@ def send_to_influx(task):
             "tags": {
                 "jobID": task.pk,
                 "cID": task.c_id,
-                # "fileName": os.path.basename(document.pcap_location),
                 "username": task.username
 
             },
@@ -30,13 +25,29 @@ def send_to_influx(task):
         }
     ]
 
-    client.write_points(json_body)
+    if misc is not None and len(misc) > 0:
+        for item in misc:
+            json_body[0]['tags'][item] = misc[item]
 
-    return
+    try:
+        client.write_points(json_body)
+    #     create databse on 404?
+    except Exception as e:
+        print(e)
+        return False
+
+    return True
 
 
-if __name__ == "__main__":
-    influx_client.create_database(INFLUX_DB)
-    from models import Task
+    # ============ DEAD CODE ============
 
-    this = Task()
+    # if __name__ == "__main__":
+    #     from config import INFLUX_IP
+    #
+    #     influx_client = InfluxDBClient(host=INFLUX_IP, database=INFLUX_DB)
+    #     influx_client.create_database(INFLUX_DB)
+    #     from models import Task
+    #
+    #     this = Task()
+
+    # ===================================
