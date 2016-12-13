@@ -20,11 +20,6 @@ import subprocess as sp
 from models import Task
 from logging_utils import send_to_influx
 
-# ARG PARSE
-parser = argparse.ArgumentParser(description="caaarroollline")
-parser.add_argument('-c', '--task-path', type=str, default='./task.json', help="path to task.json file")
-parser.add_argument('c_id', type=str, help='an integer for the accumulator')
-
 
 def main(c_id):
     mongodb_ip, influxdb_ip = get_env_vars()
@@ -42,14 +37,10 @@ def main(c_id):
         return
     task_object.start()
 
-    # TODO multiple separate commands?
-    # for task in task_object.commands:
-    #     run_task(task_object)
-
     if run_task(task_object):
         task_object.stop()
     else:
-        # do something?
+        # do something? retries and fault tolerance go here?
         pass
 
     if task_object.influx_measurement is not None:
@@ -97,5 +88,10 @@ def get_env_vars():
 
 
 if __name__ == '__main__':
+    # ARG PARSE
+    parser = argparse.ArgumentParser(description="caaarroollline")
+    # parser.add_argument('-c', '--task-path', type=str, default='./task.json', help="path to task.json file")
+    parser.add_argument('c_id', type=str, help='a uuid to find in MongoDB')
+
     args = parser.parse_args()
     main(args.c_id)

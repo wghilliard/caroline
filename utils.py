@@ -14,4 +14,4 @@ def mkdir_p(path):
 
 
 def generate_c_id():
-    return int(uuid.uuid4())
+    return str(uuid.uuid4())
