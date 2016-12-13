@@ -27,7 +27,7 @@ parser.add_argument("-q", "--queue", type=str, default=None)
 
 
 def mk_pilot(data_volume, namespace, cmd_list, docker_image_name, queue=None, log_dir="logs", username=None,
-             influx_measurement=None, c_id=None, misc=None):
+             influx_measurement=None, c_id=None, misc=None, docker_pull=False):
     """
     mk_pilot will create an object in the database with the meta data, create a script for torque,
     and submit the job to the torque queue.
@@ -42,6 +42,7 @@ def mk_pilot(data_volume, namespace, cmd_list, docker_image_name, queue=None, lo
     :param influx_measurement:
     :param c_id: if you have a preset c_id you want to be used, else it will be generated
     :param misc: extra info in dictionary form to save to mongo and influx
+    :param docker_pull: should docker try to pull the latest image?
     :return: True if task was created and submitted, False if error
     """
 
@@ -72,7 +73,7 @@ def mk_pilot(data_volume, namespace, cmd_list, docker_image_name, queue=None, lo
 
     task_object.save()
     docker_image_pull = "docker pull {0}".format(docker_image_name)
-    docker_init_cmd = "docker run -v {0}:/data --name={3} --net=\"host\" -e MONGODB_IP={4} -e INFLUXDB_IP={5} {1} python3 /opt/caroline/core.py {2}".format(
+    docker_init_cmd = "docker run -v {0}:/data --name={3} --net=\"host\" -e MONGODB_IP={4} -e INFLUXDB_IP={5} {1} {2}".format(
         data_volume, docker_image_name, task_object.c_id,
         task_object.c_id, MONGODB_IP, INFLUX_IP)
 
@@ -83,7 +84,8 @@ def mk_pilot(data_volume, namespace, cmd_list, docker_image_name, queue=None, lo
     with open(temp_file_path, "w+") as temp_file_handle:
         if queue is not None:
             print("#PBS -q {0}".format(queue), file=temp_file_handle)
-        print(docker_image_pull, file=temp_file_handle)
+        if docker_image_pull:
+            print(docker_image_pull, file=temp_file_handle)
         print(docker_init_cmd, file=temp_file_handle)
 
     try:
