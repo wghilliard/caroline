@@ -13,6 +13,7 @@ class Task(Document):
     username = StringField(default=None)
     name = StringField(default=None)
     influx_measurement = StringField(default=None)
+    in_influx = BooleanField(default=False)
 
     c_id = StringField(required=True)
     command = StringField()

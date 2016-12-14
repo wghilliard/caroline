@@ -31,7 +31,10 @@ def send_to_influx(task, influxdb_ip, misc=None):
 
     try:
         client.write_points(json_body)
-    #     create databse on 404?
+        task.in_influx = True
+        task.save()
+
+    # create databse on 404?
     except Exception as e:
         print(e)
         return False

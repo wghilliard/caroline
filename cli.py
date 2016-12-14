@@ -15,16 +15,6 @@ import json
 from utils import generate_c_id
 import subprocess as sp
 
-# ARG PARSE
-parser = argparse.ArgumentParser(description="CLI for caroline")
-parser.add_argument("--cmd", nargs="*", type=str, help="command to be executed in the container", default=None)
-parser.add_argument("-i", "--image", default=None, type=str,
-                    help="name of docker image container to run the command in")
-parser.add_argument("-d", "--data", default=None, type=str,
-                    help="mount point to bound as /data to the docker container, usually /data")
-parser.add_argument("-c", "--config", type=str, default="./config.json")
-parser.add_argument("-q", "--queue", type=str, default=None)
-
 
 def mk_pilot(data_volume, namespace, cmd_list, docker_image_name, queue=None, log_dir="logs", username=None,
              influx_measurement=None, c_id=None, misc=None, docker_pull=False):
@@ -72,8 +62,8 @@ def mk_pilot(data_volume, namespace, cmd_list, docker_image_name, queue=None, lo
         task_object.user = username
 
     task_object.save()
-    docker_image_pull = "docker pull {0}".format(docker_image_name)
-    docker_init_cmd = "docker run -v {0}:/data --name={3} --net=\"host\" -e MONGODB_IP={4} -e INFLUXDB_IP={5} {1} {2}".format(
+
+    docker_init_cmd = "docker run -v {0}:{0} --name={3} --net=\"host\" -e MONGODB_IP={4} -e INFLUXDB_IP={5} {1} {2}".format(
         data_volume, docker_image_name, task_object.c_id,
         task_object.c_id, MONGODB_IP, INFLUX_IP)
 
@@ -84,8 +74,8 @@ def mk_pilot(data_volume, namespace, cmd_list, docker_image_name, queue=None, lo
     with open(temp_file_path, "w+") as temp_file_handle:
         if queue is not None:
             print("#PBS -q {0}".format(queue), file=temp_file_handle)
-        if docker_image_pull:
-            print(docker_image_pull, file=temp_file_handle)
+        if docker_pull:
+            print("docker pull {0}".format(docker_image_name), file=temp_file_handle)
         print(docker_init_cmd, file=temp_file_handle)
 
     try:
@@ -99,6 +89,17 @@ def mk_pilot(data_volume, namespace, cmd_list, docker_image_name, queue=None, lo
 
 
 if __name__ == '__main__':
+
+    # ARG PARSE
+    parser = argparse.ArgumentParser(description="CLI for caroline")
+    parser.add_argument("--cmd", nargs="*", type=str, help="command to be executed in the container", default=None)
+    parser.add_argument("-i", "--image", default=None, type=str,
+                        help="name of docker image container to run the command in")
+    parser.add_argument("-d", "--data", default=None, type=str,
+                        help="mount point to bound as /data to the docker container, usually /data")
+    parser.add_argument("-c", "--config", type=str, default="./config.json")
+    parser.add_argument("-q", "--queue", type=str, default=None)
+
     connect(MONGODB_DATABASE, host=MONGODB_IP)
     args = parser.parse_args()
     config_data = dict()
