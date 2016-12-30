@@ -20,7 +20,7 @@ def generate_c_id():
 
 def check_dir(directory_name):
     try:
-        sp.call("ls {0}".format(directory_name))
+        sp.call("ls {0} > /dev/null".format(directory_name), shell=True)
         return True
     except Exception as e:
         print(e)
