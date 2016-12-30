@@ -15,6 +15,8 @@ class Task(Document):
     influx_measurement = StringField(default=None)
     in_influx = BooleanField(default=False)
 
+    pbs_job_id = StringField(default=None)
+
     c_id = StringField(required=True)
     command = StringField()
     cmd_list = ListField(StringField())

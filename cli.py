@@ -111,6 +111,18 @@ def mk_pilot(data_volume_list, cmd_list, docker_image_name, queue=None, log_dir=
     return True
 
 
+
+def delete_docker_containers():
+    connect(MONGODB_DATABASE, host=MONGODB_IP)
+    tasks = Task.objects()
+    # TODO use docker api instead
+    for task in tasks:
+        try:
+            sp.call("docker rm {0}".format(task.c_id))
+        except Exception as e:
+            print(e)
+
+
 if __name__ == '__main__':
 
     # ARG PARSE

@@ -22,7 +22,7 @@ from logging_utils import send_to_influx
 
 
 def main(c_id):
-    mongodb_ip, influxdb_ip = get_env_vars()
+    mongodb_ip, influxdb_ip, pbs_job_id = get_env_vars()
 
     # MONGODB
     try:
@@ -35,9 +35,10 @@ def main(c_id):
     if task_object is None:
         print("cannot find c_id {0} in {1}".format(c_id, MONGODB_DATABASE))
         return
+
+    task_object.pbs_job_id = pbs_job_id
     task_object.start()
 
-    # if run_task(task_object):
     run_task(task_object)
     task_object.stop()
     # do something? retries and fault tolerance go here?
@@ -83,7 +84,12 @@ def get_env_vars():
     except KeyError:
         influxdb_ip = "localhost"
 
-    return mongodb_ip, influxdb_ip
+    try:
+        pbs_job_id = os.environ['PBS_JOBID']
+    except KeyError:
+        pbs_job_id = "0"
+
+    return mongodb_ip, influxdb_ip, pbs_job_id
 
 
 if __name__ == '__main__':
