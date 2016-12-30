@@ -103,7 +103,7 @@ def lariatsoft_one(gen_fcl_file_path, conv_fcl_file_path, out_path, n_events, in
     # TODO this is atrocious, please fix this
     # command_final = " && ".join(commands)
 
-    mk_pilot(data_volume, namespace, commands, config_data.get('default_image'), influx_measurement="lariatsoft_one",
+    mk_pilot([data_volume], commands, config_data.get('default_image'), influx_measurement="lariatsoft_one",
              queue="cpuqueue", c_id=c_id)
 
     return True
@@ -153,37 +153,27 @@ def lariatsoft_two(in_path, conv_fcl_file_path, out_path):
     conv_fcl_file_base = os.path.basename(conv_fcl_file_path)
 
     commands = list()
-    # use data_volume, namespace,
     commands.append(
         "cp /data/docker_user/fcl_files/{0} /products/dev && source /etc/lariatsoft_setup.sh && lar -c /products/dev/{0} -s {1} -T {2}".format(
             conv_fcl_file_base, in_path, phase_two_output_path))
 
-    # # Assuming the python is there?
-    # rick = os.path.join(tmp_out_path, "2D_h5")
-    # morty = os.path.join(tmp_out_path, "3D_h5")
-    #
-    # commands.append(
-    #     "source /opt/root/bin/thisroot.sh && python /opt/Wirecell_Root_Procssing/ProcessRootFile_WireCell.py {0} {1} {2}".format(
-    #         phase_two_output_path, rick, morty))
-
-    # TODO this is atrocious, please fix this - DONE
-    # command_final = " && ".join(commands)
-
     print("pilot command: \n", commands)
-    mk_pilot(data_volume, namespace, commands, config_data.get('default_image'), influx_measurement="lariatsoft_two",
+    mk_pilot([data_volume], commands, config_data.get('default_image'), influx_measurement="lariatsoft_two",
              queue="cpuqueue", c_id=c_id)
 
     return True
 
 
-def wire_cell(in_path, out_path):
+def wire_cell(in_path, out_path, explicit=False):
     """
 
     :param in_path:
     :param out_path:
+    :param explicit: is the in_path and out_path explicit or does it need to be generated? bool()
     :return:
     """
     c_id = generate_c_id()
+    commands = list()
 
     config_data = dict()
     with open("./config.json") as config_file_handle:
@@ -192,20 +182,21 @@ def wire_cell(in_path, out_path):
     data_volume = config_data.get('data_volume')
     namespace = config_data.get('namespace')
 
-    tmp_out_path = os.path.join(data_volume, namespace, out_path, str(c_id))
+    if explicit:
+        rick = os.path.join(out_path, "2D_h5")
+        morty = os.path.join(out_path, "3D_h5")
+    else:
+        tmp_out_path = os.path.join(data_volume, namespace, out_path, str(c_id))
 
-    commands = list()
-
-    # # Assuming the python is there?
-    rick = os.path.join(tmp_out_path, "2D_h5")
-    morty = os.path.join(tmp_out_path, "3D_h5")
+        rick = os.path.join(tmp_out_path, "2D_h5")
+        morty = os.path.join(tmp_out_path, "3D_h5")
 
     commands.append(
         "source /opt/root/bin/thisroot.sh && python /opt/Wirecell_Root_Procssing/ProcessRootFile_WireCell.py {0} {1} {2}".format(
             in_path, rick, morty))
 
     print("pilot command: \n", commands)
-    if mk_pilot(data_volume, namespace, commands, "wghilliard/wire_cell:1.0", influx_measurement="wire_cell",
+    if mk_pilot([data_volume], commands, "wghilliard/wire_cell:1.0", influx_measurement="wire_cell",
                 queue="cpuqueue", c_id=c_id):
 
         return True
@@ -232,3 +223,6 @@ if __name__ == "__main__":
 
     lariatsoft_two("/Users/wghilliard/single_gen_2.root", "/data/docker_user/fcl_files/WireDump_3D.fcl",
                    "/data/docker_user/grayson_test_2")
+
+    wire_cell("/data/docker_user/caroline_rc_test/1481095300/wire_dump_0.root",
+              "/data/docker_user/caroline_rc_test/1481095300/")

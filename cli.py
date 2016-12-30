@@ -16,7 +16,7 @@ from utils import generate_c_id, check_dir
 import subprocess as sp
 
 
-def mk_pilot(data_volume_list, namespace, cmd_list, docker_image_name, queue=None, log_dir="/data/caroline/logs",
+def mk_pilot(data_volume_list, cmd_list, docker_image_name, queue=None, log_dir="/data/caroline/logs",
              username=None,
              influx_measurement=None, c_id=None, misc=None, docker_pull=False, nvidia_docker=False):
     """
@@ -24,7 +24,7 @@ def mk_pilot(data_volume_list, namespace, cmd_list, docker_image_name, queue=Non
     and submit the job to the torque queue.
 
     :param data_volume_list: list of mount points to bound as to the docker container, usually /data list(str())
-    :param namespace: something like docker_user NOTE: NO LEADING '/' str()
+    # :param namespace: something like docker_user NOTE: NO LEADING '/' str()
     :param cmd_list: list() if commands to be executed in the container list(str())
     :param docker_image_name: name of docker image container to run the command in str()
     :param queue: the torque queue to submit the job, if omitted Torque will decide str()
