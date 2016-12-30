@@ -14,6 +14,7 @@ from config import MONGODB_DATABASE, INFLUX_IP, MONGODB_IP
 import json
 from utils import generate_c_id, check_dir
 import subprocess as sp
+import docker
 
 
 def mk_pilot(data_volume_list, cmd_list, docker_image_name, queue=None, log_dir="/data/caroline/logs",
@@ -111,14 +112,21 @@ def mk_pilot(data_volume_list, cmd_list, docker_image_name, queue=None, log_dir=
     return True
 
 
-
-def delete_docker_containers():
+def cleanup():
     connect(MONGODB_DATABASE, host=MONGODB_IP)
     tasks = Task.objects()
-    # TODO use docker api instead
+    client = docker.from_env()
+
     for task in tasks:
         try:
-            sp.call("docker rm {0}".format(task.c_id))
+            this = client.containers.get("{0}".format(task.c_id))
+            this.remove(force=True)
+            # sp.call("docker rm {0}".format(task.c_id))
+        except Exception as e:
+            print(e)
+
+        try:
+            sp.call("qdel {0}".format(task.pbs_job_id))
         except Exception as e:
             print(e)
 
