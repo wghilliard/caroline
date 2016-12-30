@@ -12,11 +12,12 @@ from models import Task
 from mongoengine import connect
 from config import MONGODB_DATABASE, INFLUX_IP, MONGODB_IP
 import json
-from utils import generate_c_id
+from utils import generate_c_id, check_dir
 import subprocess as sp
 
 
-def mk_pilot(data_volume_list, namespace, cmd_list, docker_image_name, queue=None, log_dir="/data/caroline/logs", username=None,
+def mk_pilot(data_volume_list, namespace, cmd_list, docker_image_name, queue=None, log_dir="/data/caroline/logs",
+             username=None,
              influx_measurement=None, c_id=None, misc=None, docker_pull=False, nvidia_docker=False):
     """
     mk_pilot will create an object in the database with the meta data, create a script for torque,
@@ -67,6 +68,8 @@ def mk_pilot(data_volume_list, namespace, cmd_list, docker_image_name, queue=Non
     task_object.save()
 
     for index, mount in enumerate(data_volume_list):
+        # Ensure mount points are accessible...
+        check_dir(mount)
         data_volume_list[index] = ("-v {0}:{0}".format(mount))
 
     data_volume = " ".join(data_volume_list)
