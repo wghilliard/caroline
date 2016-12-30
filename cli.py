@@ -83,11 +83,12 @@ def mk_pilot(data_volume_list, namespace, cmd_list, docker_image_name, queue=Non
             data_volume, docker_image_name, task_object.c_id,
             task_object.c_id, MONGODB_IP, INFLUX_IP)
 
-    print("C_ID: {0}".format(task_object.c_id))
-    print("Logging to \n{0}/{1}.torque.log\n{0}/{1}.torque.err".format(log_dir, str(task_object.c_id)))
+    print("C_ID: `{0}`".format(task_object.c_id))
+    print("Logging to ...\n    `{0}/{1}.torque.log`\n    `{0}/{1}.torque.err`".format(log_dir, str(task_object.c_id)))
+
     temp_file_path = os.path.join("/tmp", "{0}.run".format(task_object.c_id))
 
-    # print("writing exec file to: `{0}`".format(temp_file_path))
+    print("Exec File: `{0}`".format(temp_file_path))
 
     with open(temp_file_path, "w+") as temp_file_handle:
         if queue is not None:
