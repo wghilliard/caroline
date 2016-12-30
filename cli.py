@@ -93,6 +93,9 @@ def mk_pilot(data_volume_list, namespace, cmd_list, docker_image_name, queue=Non
             print("#PBS -q {0}".format(queue), file=temp_file_handle)
         if docker_pull:
             print("docker pull {0}".format(docker_image_name), file=temp_file_handle)
+
+        print("#PBS -o {0}/{1}.torque.log".format(log_dir, str(task_object.c_id)))
+        print("#PBS -e {0}/{1}.torque.err".format(log_dir, str(task_object.c_id)))
         print(docker_init_cmd, file=temp_file_handle)
 
     try:
