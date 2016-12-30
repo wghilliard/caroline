@@ -16,25 +16,28 @@ from utils import generate_c_id
 import subprocess as sp
 
 
-def mk_pilot(data_volume, namespace, cmd_list, docker_image_name, queue=None, log_dir="logs", username=None,
-             influx_measurement=None, c_id=None, misc=None, docker_pull=False):
+def mk_pilot(data_volume_list, namespace, cmd_list, docker_image_name, queue=None, log_dir="/data/caroline/logs", username=None,
+             influx_measurement=None, c_id=None, misc=None, docker_pull=False, nvidia_docker=False):
     """
     mk_pilot will create an object in the database with the meta data, create a script for torque,
     and submit the job to the torque queue.
 
-    :param data_volume: mount point to bound as /data to the docker container, usually /data
-    :param namespace: something like docker_user NOTE: NO LEADING '/'
-    :param cmd_list: list() if commands to be executed in the container
-    :param docker_image_name: name of docker image container to run the command in
-    :param queue: the torque queue to submit the job, if omitted Torque will decide
-    :param log_dir: the directory inside the context of data_volume to command output to
-    :param username: the username to be associated with the task
-    :param influx_measurement:
-    :param c_id: if you have a preset c_id you want to be used, else it will be generated
-    :param misc: extra info in dictionary form to save to mongo and influx
-    :param docker_pull: should docker try to pull the latest image?
-    :return: True if task was created and submitted, False if error
+    :param data_volume_list: list of mount points to bound as to the docker container, usually /data list(str())
+    :param namespace: something like docker_user NOTE: NO LEADING '/' str()
+    :param cmd_list: list() if commands to be executed in the container list(str())
+    :param docker_image_name: name of docker image container to run the command in str()
+    :param queue: the torque queue to submit the job, if omitted Torque will decide str()
+    :param log_dir: the directory inside the context of data_volume to command output to str()
+    :param username: the username to be associated with the task str()
+    :param influx_measurement: str()
+    :param c_id: if you have a preset c_id you want to be used, else it will be generated str()
+    :param misc: extra info in dictionary form to save to mongo and influx dict()
+    :param docker_pull: should docker try to pull the latest image? bool()
+    :param nvidia_docker: should the nvidia-docker wrapper be used? bool()
+    :return: True if task was created and submitted, False if error bool()
     """
+
+    # TODO phase out namespace from wrappers.
 
     task_object = Task()
 
@@ -53,7 +56,7 @@ def mk_pilot(data_volume, namespace, cmd_list, docker_image_name, queue=None, lo
 
     task_object.cmd_list = cmd_list
     task_object.log_file = os.path.abspath(
-        os.path.join(data_volume, namespace, log_dir, str(task_object.c_id) + ".log"))
+        os.path.join(log_dir, str(task_object.c_id) + ".log"))
     task_object.work_dir = "/opt"
 
     task_object.influx_measurement = influx_measurement
@@ -63,13 +66,24 @@ def mk_pilot(data_volume, namespace, cmd_list, docker_image_name, queue=None, lo
 
     task_object.save()
 
-    docker_init_cmd = "docker run -v {0}:{0} --name={3} --net=\"host\" -e MONGODB_IP={4} -e INFLUXDB_IP={5} {1} {2}".format(
-        data_volume, docker_image_name, task_object.c_id,
-        task_object.c_id, MONGODB_IP, INFLUX_IP)
+    for index, mount in enumerate(data_volume_list):
+        data_volume_list[index] = ("-v {0}:{0}".format(mount))
 
+    data_volume = " ".join(data_volume_list)
+
+    if nvidia_docker:
+        docker_init_cmd = "nvidia-docker run {0} --name={3} --net=\"host\" -e MONGODB_IP={4} -e INFLUXDB_IP={5} {1} {2}".format(
+            data_volume, docker_image_name, task_object.c_id,
+            task_object.c_id, MONGODB_IP, INFLUX_IP)
+    else:
+        docker_init_cmd = "docker run {0} --name={3} --net=\"host\" -e MONGODB_IP={4} -e INFLUXDB_IP={5} {1} {2}".format(
+            data_volume, docker_image_name, task_object.c_id,
+            task_object.c_id, MONGODB_IP, INFLUX_IP)
+
+    print("C_ID: {0}".format(task_object.c_id))
     temp_file_path = os.path.join("/tmp", "{0}.run".format(task_object.c_id))
 
-    print("writing exec file to: `{0}`".format(temp_file_path))
+    # print("writing exec file to: `{0}`".format(temp_file_path))
 
     with open(temp_file_path, "w+") as temp_file_handle:
         if queue is not None:
@@ -96,7 +110,7 @@ if __name__ == '__main__':
     parser.add_argument("-i", "--image", default=None, type=str,
                         help="name of docker image container to run the command in")
     parser.add_argument("-d", "--data", default=None, type=str,
-                        help="mount point to bound as /data to the docker container, usually /data")
+                        help="mount point to the docker container, usually /data")
     parser.add_argument("-c", "--config", type=str, default="./config.json")
     parser.add_argument("-q", "--queue", type=str, default=None)
 
@@ -114,13 +128,14 @@ if __name__ == '__main__':
         docker_image_name = args.image
 
     if args.data is None:
-        data_volume = config_data['data_volume']
+        data_volume_list = config_data['data_volume_list']
     else:
-        data_volume = args.data
+        data_volume_list = args.data
 
     if args.queue is None and config_data.get('queue'):
         queue = config_data['queue']
     else:
         queue = args.queue
 
-    mk_pilot(data_volume, "docker_user", args.cmd[0], docker_image_name, queue, username=config_data.get('username'))
+    mk_pilot(data_volume_list, "docker_user", args.cmd[0], docker_image_name, queue,
+             username=config_data.get('username'))
