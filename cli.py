@@ -57,7 +57,7 @@ def mk_pilot(data_volume_list, namespace, cmd_list, docker_image_name, queue=Non
 
     task_object.cmd_list = cmd_list
     task_object.log_file = os.path.abspath(
-        os.path.join(log_dir, str(task_object.c_id) + ".log"))
+        os.path.join(log_dir, str(task_object.c_id) + "caroline.log"))
     task_object.work_dir = "/opt"
 
     task_object.influx_measurement = influx_measurement
