@@ -91,11 +91,12 @@ def mk_pilot(data_volume_list, namespace, cmd_list, docker_image_name, queue=Non
     with open(temp_file_path, "w+") as temp_file_handle:
         if queue is not None:
             print("#PBS -q {0}".format(queue), file=temp_file_handle)
-        if docker_pull:
-            print("docker pull {0}".format(docker_image_name), file=temp_file_handle)
 
         print("#PBS -o {0}/{1}.torque.log".format(log_dir, str(task_object.c_id)), file=temp_file_handle)
         print("#PBS -e {0}/{1}.torque.err".format(log_dir, str(task_object.c_id)), file=temp_file_handle)
+
+        if docker_pull:
+            print("docker pull {0}".format(docker_image_name), file=temp_file_handle)
         print(docker_init_cmd, file=temp_file_handle)
 
     try:
