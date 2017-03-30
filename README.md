@@ -43,7 +43,7 @@ BETA NOTE: a connection to InfluxDB is required!!
 ##### Host Install
 Clone
 
-    git clone github.com/wghilliard/caroline.git
+    git clone https://github.com/wghilliard/caroline.git
 
 Install Python3 dependencies.
     
