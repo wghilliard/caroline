@@ -80,7 +80,7 @@ Configure `caroline/config.py` and `caroline/config.json`
 NOTE: a connection to MongoDB is required!!
 
     from mongoengine import connect
-    connect("caroline")
+    connect("caroline", host=MONGODB_IP)
 
 BETA NOTE: a connection to InfluxDB is required!!
 
