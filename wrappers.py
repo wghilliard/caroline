@@ -128,7 +128,7 @@ def lariatsoft_two(in_path, conv_fcl_file_path, out_path):
     with open("./config.json") as config_file_handle:
         config_data = json.load(config_file_handle)
 
-    volume_list = config_data.get('volume_list')
+    volume_list = config_data.get('volumes')
     data_volume = config_data.get('data_volume')
     namespace = config_data.get('namespace')
 
@@ -166,7 +166,7 @@ def lariatsoft_two(in_path, conv_fcl_file_path, out_path):
 
     print("pilot command: \n", commands)
     mk_pilot(volume_list, commands, config_data.get('default_image'), influx_measurement="lariatsoft_two",
-             queue="cpuqueue", c_id=c_id)
+             queue="cpu_queue", c_id=c_id)
 
     return True
 
