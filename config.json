@@ -1,8 +1,9 @@
 {
   "username": "wghilliard",
-  "default_image": "wghilliard/lariatsoft_caroline:1.0",
+  "default_image": "wghilliard/lariatsoft_caroline:1.1",
   "log_dir": "/data/caroline/logs",
-  "data_volume": ["/data"],
+  "volumes": ["/data"],
+  "data_volume": "/data",
   "namespace": "docker_user/",
-  "queue": "cpuqueue"
+  "queue": "cpu_super"
 }

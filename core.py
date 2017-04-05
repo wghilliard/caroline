@@ -22,29 +22,31 @@ from logging_utils import send_to_influx
 
 
 def main(c_id):
-    mongodb_ip, influxdb_ip, pbs_job_id = get_env_vars()
+    # c_id = str(c_id)
+    MONGODB_IP, INFLUXDB_IP, pbs_job_id = get_env_vars()
 
     # MONGODB
     try:
-        connect(MONGODB_DATABASE, host=mongodb_ip)
+        connect(MONGODB_DATABASE, host=MONGODB_IP)
     except Exception as e:
         print(e)
         return
 
     task_object = Task.objects(c_id=c_id).first()
+
     if task_object is None:
         print("cannot find c_id {0} in {1}".format(c_id, MONGODB_DATABASE))
         return
 
     task_object.pbs_job_id = pbs_job_id
-    task_object.start()
 
+    task_object.start()
     run_task(task_object)
     task_object.stop()
     # do something? retries and fault tolerance go here?
 
     if task_object.influx_measurement is not None:
-        send_to_influx(task_object, influxdb_ip, misc=task_object.misc)
+        send_to_influx(task_object, INFLUXDB_IP, misc=task_object.misc)
 
     return
 

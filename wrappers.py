@@ -9,14 +9,16 @@ import os
 from utils import mkdir_p, generate_c_id
 from mongoengine import connect
 from config import MONGODB_DATABASE, MONGODB_IP
-import time
+
+
+# import time
 
 
 def lariatsoft_one(gen_fcl_file_path, conv_fcl_file_path, out_path, n_events, index):
     """
     lariatsoft_one represents the first iteration's generation and conversion steps
     Phases:
-    1. Generate
+    1. Generate root files
     2. Convert with WireDump
     3. Convert to H5
 
@@ -30,8 +32,8 @@ def lariatsoft_one(gen_fcl_file_path, conv_fcl_file_path, out_path, n_events, in
     :param gen_fcl_file_path: a path on the host that ends with .fcl (used for generation phase)
     :param conv_fcl_file_path: a path on the host that ends with .fcl (used for conversion phase)
     :param out_path: a path with config_data.get('data_volume') as the root ex "$DATA_VOLUME/$NAMESPACE/electron/"
-    :param n_events: integer number of events that should be generated
-    :param index: single_gen_X where X is the index
+    :param n_events: integer number of events that should be generated (is this in total or per worker? probably per worker)
+    :param index: single_gen_X where X is the index (batch_number?)
     :return:
     """
     # python3 ./cli.py --cmd 'cp /data/docker_user/fcl_files/MC_geant4_pion-0.fcl
@@ -47,9 +49,11 @@ def lariatsoft_one(gen_fcl_file_path, conv_fcl_file_path, out_path, n_events, in
         config_data = json.load(config_file_handle)
 
     data_volume = config_data.get('data_volume')
+    volume_list = config_data.get('volumes')
     namespace = config_data.get('namespace')
 
     tmp_fcl_file_path = os.path.join(data_volume, namespace, "fcl_files/")
+
     try:
         shutil.copy(gen_fcl_file_path, tmp_fcl_file_path)
     except shutil.Error as e:
@@ -80,7 +84,7 @@ def lariatsoft_one(gen_fcl_file_path, conv_fcl_file_path, out_path, n_events, in
     phase_one_output_path = os.path.join(tmp_out_path, "single_gen_{0}.root".format(index))
     gen_fcl_file_base = os.path.basename(gen_fcl_file_path)
     commands = list()
-    # use data_volume, namespace
+    # TODO use data_volume, namespace
     commands.append(
         "cp /data/docker_user/fcl_files/{0} /products/dev && source /etc/lariatsoft_setup.sh && lar -c /products/dev/{0} -n {1} -o {2}".format(
             gen_fcl_file_base, n_events, phase_one_output_path))
@@ -100,11 +104,12 @@ def lariatsoft_one(gen_fcl_file_path, conv_fcl_file_path, out_path, n_events, in
     #     "source /opt/root/bin/thisroot.sh && python /opt/Wirecell_Root_Procssing/ProcessRootFile_WireCell.py {0} {1} {2}".format(
     #         phase_two_output_path, rick, morty))
 
-    # TODO this is atrocious, please fix this
+    # TODO this is atrocious, please fix this (done)
     # command_final = " && ".join(commands)
 
-    mk_pilot([data_volume], commands, config_data.get('default_image'), influx_measurement="lariatsoft_one",
-             queue="cpuqueue", c_id=c_id)
+    # TODO better queue assignment
+    mk_pilot(volume_list, commands, config_data.get('default_image'), influx_measurement="lariatsoft_one",
+             queue="cpu_queue", c_id=c_id)
 
     return True
 
@@ -123,6 +128,7 @@ def lariatsoft_two(in_path, conv_fcl_file_path, out_path):
     with open("./config.json") as config_file_handle:
         config_data = json.load(config_file_handle)
 
+    volume_list = config_data.get('volume_list')
     data_volume = config_data.get('data_volume')
     namespace = config_data.get('namespace')
 
@@ -142,6 +148,7 @@ def lariatsoft_two(in_path, conv_fcl_file_path, out_path):
 
 
     tmp_out_path = os.path.join(data_volume, namespace, out_path, str(c_id))
+
     try:
         mkdir_p(tmp_out_path)
     except Exception as e:
@@ -158,7 +165,7 @@ def lariatsoft_two(in_path, conv_fcl_file_path, out_path):
             conv_fcl_file_base, in_path, phase_two_output_path))
 
     print("pilot command: \n", commands)
-    mk_pilot([data_volume], commands, config_data.get('default_image'), influx_measurement="lariatsoft_two",
+    mk_pilot(volume_list, commands, config_data.get('default_image'), influx_measurement="lariatsoft_two",
              queue="cpuqueue", c_id=c_id)
 
     return True
@@ -219,10 +226,10 @@ if __name__ == "__main__":
     # lariatsoft_one("/data/docker_user/fcl_files/C_geant4_pion-0.fcl", "/data/docker_user/fcl_files/WireDump_3D.fcl", 10, 22)
 
     lariatsoft_one("/data/docker_user/fcl_files/MC_geant4_pion-0.fcl", "/data/docker_user/fcl_files/WireDump_3D.fcl",
-                   "caroline_rc_test", 10, 22)
+                   "caroline_rc_2_test", 10, 22)
 
-    lariatsoft_two("/Users/wghilliard/single_gen_2.root", "/data/docker_user/fcl_files/WireDump_3D.fcl",
-                   "/data/docker_user/grayson_test_2")
-
-    wire_cell("/data/docker_user/caroline_rc_test/1481095300/wire_dump_0.root",
-              "/data/docker_user/caroline_rc_test/1481095300/")
+    # lariatsoft_two("/Users/wghilliard/single_gen_2.root", "/data/docker_user/fcl_files/WireDump_3D.fcl",
+    #                "/data/docker_user/grayson_test_2")
+    #
+    # wire_cell("/data/docker_user/caroline_rc_test/1481095300/wire_dump_0.root",
+    #           "/data/docker_user/caroline_rc_test/1481095300/")

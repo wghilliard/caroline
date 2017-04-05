@@ -1,5 +1,5 @@
 MONGODB_DATABASE = "caroline"
-MONGODB_IP = "localhost"
+MONGODB_IP = "192.168.1.5"
 INFLUX = True
 INFLUX_DB = "caroline"
-INFLUX_IP = "localhost"
+INFLUX_IP = "192.168.1.5"

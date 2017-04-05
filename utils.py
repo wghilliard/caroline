@@ -20,6 +20,8 @@ def generate_c_id():
 
 def check_dir(directory_name):
     try:
+        # TODO check the following...
+        # os.path.exists(directory_name)
         sp.call("ls {0} > /dev/null".format(directory_name), shell=True)
         return True
     except Exception as e:
