@@ -6,7 +6,7 @@ from cli import mk_pilot
 import shutil
 import json
 import os
-from utils import mkdir_p, generate_c_id, link_jobs_by_c_id
+from utils import mkdir_p, generate_c_id
 from mongoengine import connect
 from config import MONGODB_DATABASE, MONGODB_IP
 
@@ -198,7 +198,7 @@ def lariatsoft_two(in_path, conv_fcl_file_path, out_path):
     mk_pilot(volume_list, commands, config_data.get('default_image'), influx_measurement="lariatsoft_two",
              queue="cpu_queue", c_id=c_id)
 
-    return True
+    return c_id
 
 
 def wire_cell(in_path, out_path, explicit=False):
