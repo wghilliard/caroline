@@ -16,12 +16,13 @@ from utils import generate_c_id, check_dir
 import subprocess as sp
 import docker
 
+import logging as lg
+
 
 # TODO switch to logging.
 
 def mk_pilot(data_volume_list, cmd_list, docker_image_name, queue=None, log_dir="/data/caroline/logs",
-             username=None,
-             influx_measurement=None, c_id=None, misc=None, docker_pull=False, nvidia_docker=False):
+             username=None, influx_measurement=None, c_id=None, misc=None, docker_pull=False, nvidia_docker=False):
     """
     mk_pilot will create an object in the database with the meta data, create a script for torque,
     and submit the job to the torque queue.
@@ -49,11 +50,10 @@ def mk_pilot(data_volume_list, cmd_list, docker_image_name, queue=None, log_dir=
         task_object.c_id = generate_c_id()
     else:
         try:
-            # task_object.c_id = int(c_id)
             task_object.c_id = str(c_id)
         except Exception as e:
-            print(e)
-            print("INFO: str(c_id) failed")
+            lg.exception(e)
+            lg.info("str(c_id) failed")
             return False
 
     if misc is not None:
@@ -87,12 +87,12 @@ def mk_pilot(data_volume_list, cmd_list, docker_image_name, queue=None, log_dir=
             data_volume, docker_image_name, task_object.c_id,
             task_object.c_id, MONGODB_IP, INFLUX_IP)
 
-    print("C_ID: `{0}`".format(task_object.c_id))
-    print("Logging to ...\n    `{0}/{1}.torque.log`\n    `{0}/{1}.torque.err`".format(log_dir, str(task_object.c_id)))
+    lg.info("C_ID: `{0}`".format(task_object.c_id))
+    lg.info("Logging to ...\n    `{0}/{1}.torque.log`\n    `{0}/{1}.torque.err`".format(log_dir, str(task_object.c_id)))
 
     temp_file_path = os.path.join("/tmp", "{0}.run".format(task_object.c_id))
 
-    print("Exec File: `{0}`".format(temp_file_path))
+    lg.info("Exec File: `{0}`".format(temp_file_path))
 
     with open(temp_file_path, "w+") as temp_file_handle:
         if queue is not None:
@@ -109,7 +109,7 @@ def mk_pilot(data_volume_list, cmd_list, docker_image_name, queue=None, log_dir=
         sp.call("chmod +x {0} && qsub {0} && rm {0}".format(temp_file_path), shell=True)
 
     except Exception as e:
-        print(e)
+        lg.exception(e)
         return False
 
     return True
@@ -126,12 +126,12 @@ def cleanup():
             this.remove(force=True)
             # sp.call("docker rm {0}".format(task.c_id))
         except Exception as e:
-            print(e)
+            lg.info(e)
 
         try:
             sp.call("qdel {0}".format(task.pbs_job_id))
         except Exception as e:
-            print(e)
+            lg.info(e)
 
 
 if __name__ == '__main__':

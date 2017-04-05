@@ -22,7 +22,6 @@ from logging_utils import send_to_influx
 
 
 def main(c_id):
-    # c_id = str(c_id)
     MONGODB_IP, INFLUXDB_IP, pbs_job_id = get_env_vars()
 
     # MONGODB

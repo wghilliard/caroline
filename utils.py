@@ -27,3 +27,10 @@ def check_dir(directory_name):
     except Exception as e:
         print(e)
         return False
+
+
+def link_jobs_by_c_id(prefix_path, c_id_list, dest_dir_path):
+    for c_id in c_id_list:
+        for item in os.listdir(os.path.join(prefix_path, c_id)):
+            os.symlink(os.path.join(prefix_path, c_id, item), os.path.join(dest_dir_path, item))
+    return True
