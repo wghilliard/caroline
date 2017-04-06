@@ -79,11 +79,11 @@ def mk_pilot(data_volume_list, cmd_list, docker_image_name, queue=None, log_dir=
     data_volume = " ".join(data_volume_list)
 
     if nvidia_docker:
-        docker_init_cmd = "nvidia-docker run {0} --name={3} --net=\"host\" -e MONGODB_IP={4} -e INFLUXDB_IP={5} {1} {2}".format(
+        docker_init_cmd = "nvidia-docker run {0} --rm --name={3} --net=\"host\" -e MONGODB_IP={4} -e INFLUXDB_IP={5} {1} {2}".format(
             data_volume, docker_image_name, task_object.c_id,
             task_object.c_id, MONGODB_IP, INFLUX_IP)
     else:
-        docker_init_cmd = "docker run {0} --name={3} --net=\"host\" -e MONGODB_IP={4} -e INFLUXDB_IP={5} {1} {2}".format(
+        docker_init_cmd = "docker run {0} --rm  --name={3} --net=\"host\" -e MONGODB_IP={4} -e INFLUXDB_IP={5} {1} {2}".format(
             data_volume, docker_image_name, task_object.c_id,
             task_object.c_id, MONGODB_IP, INFLUX_IP)
 
